@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import {
   Chart,
   ChartSeries,
@@ -8,27 +8,48 @@ import {
   ChartTitle,
 } from "@progress/kendo-react-charts";
 
-import { getPerformance } from "../services/dataService";
 import Loading from "../layout/Loading";
+import {CompanyData} from '../helpers/types'
 
-export default function PerformancePanel() {
-  const [data, setData] = React.useState<string[]>();
-  React.useEffect(() => {
-    getPerformance().then((results: string[]) => {
-      setData(results);
-    })
-  }, []);
+export default function PerformancePanel({companyData, companyName}: { companyData: CompanyData[], companyName: string | null }) {
+  const [dateData, setDateData] = useState<string[]>([]);
+  const [highData, setHighData] = useState<string[]>([]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    const month = monthNames[date.getMonth()];
+    const formattedDate = `${day} ${month}`;
+    return formattedDate;
+  }
+
+  useEffect(() => {
+    if(companyData.length > 0) {
+      const requiredData = companyData.filter(item => item.name === companyName ? decodeURIComponent(companyName) : null)
+      if (requiredData.length == 0) {
+        return
+      }
+      const stockData = requiredData[0].stockData
+      const dates = stockData.map(item => formatDate(item.date));
+      const highPrices = stockData.map(item => item.high);
+      setDateData(dates)
+      setHighData(highPrices)
+    }
+  }, [companyData, companyName])
 
   return (
     <>
-      {!data && <Loading />}
-      <Chart style={{ opacity: data ? "1" : "0" }}>
+      {highData.length == 0 && <Loading />}
+      <Chart style={{ opacity: highData.length > 0 ? "1" : "0" }}>
         <ChartTitle text="Fund Performance" />
         <ChartCategoryAxis>
-          <ChartCategoryAxisItem categories={["2014", "2015", "2016", "2017", "2018", "2019", "2020"]} />
+          <ChartCategoryAxisItem categories={dateData} />
         </ChartCategoryAxis>
         <ChartSeries>
-          <ChartSeriesItem type="line" data={data} />
+          <ChartSeriesItem type="line" data={highData} />
         </ChartSeries>
       </Chart>
     </>

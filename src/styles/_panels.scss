@@ -59,3 +59,22 @@
 .k-grid td, .k-grid-header .k-header > .k-link {
   text-overflow: initial;
 }
+
+// Company Panel
+.company-panel{
+  a {
+    text-decoration: none!important;
+    color: #000000;
+  }
+  .company-name {
+    font-size: 18px;
+    height: 60px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
+  }
+  .company-name:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+}
